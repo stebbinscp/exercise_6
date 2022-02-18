@@ -78,9 +78,9 @@ requirements) is inspired by [yap.chat](https://yap.chat/).
 
 One point each for:
 - Remember permissions:
-  - When a user with an auth key creates a chat or enter one
-  with a magic link, save on the server that they have permission to use that
-  chat room. **[1 pt]**
+  - Usernames are unique. When a user with an auth key creates a chat or enters
+  one with a magic link, save on the server that they have permission to use
+  that chat room. **[1 pt]**
   - API endpoint to list which rooms a user is in. **[1 pt]**
   - Optionally, you may let users name/rename rooms [0 pts]
 - Single-Page UI:
