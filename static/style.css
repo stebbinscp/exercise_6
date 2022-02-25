@@ -3,7 +3,20 @@ body {
   margin: 0;
 }
 
+#chat_section {
+  display: none;
+}
+
+#auth {
+  display: block;
+}
+
+#chat_index {
+  display: none;
+}
+
 .container {
+  display: none;
   width: 960px;
   height: 100%;
   margin: auto;
@@ -117,10 +130,6 @@ hero button {
 
 .clip {
   overflow: hidden;
-}
-
-.auth {
-  display: none;
 }
 
 .chat {
