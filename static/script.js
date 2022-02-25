@@ -99,21 +99,29 @@ function signup() {
         console.log("successful");
         document.getElementById("auth").style.display = "none";
         document.getElementById("chat_index").style.display = "block";
-
+        
+        myStorage = window.localStorage;
+        authkey = myStorage.getItem('authkey');
         fetch('/chat_list?'+ new URLSearchParams({
-          authkey: document.getElementById('authkey').value
+          authkey: authkey
         }))
         .then(response => response.json())
         .then(data => {
           console.log(data);
           console.log("successful");
-          const chats = datum.chats;
-          const chat_index = document.getElementById("chat_index");
-          chats.map((chat) => {
-            var text = document.createTextNode("chat id: "+chat);
-            text.addEventListener("onClick", getMessages())
+          if ("chats" in Object.keys(data)) {
+            const chats = data.chats;
+            const chat_index = document.getElementById("chat_index");
+            chats.map((chat) => {
+              var text = document.createTextNode("chat id: "+chat);
+              text.addEventListener("onClick", getMessages())
+              chat_index.appendChild(text);
+            })
+          } else {
+            var text = document.createTextNode("Oops! No available chats!");
             chat_index.appendChild(text);
-          })
+          }
+          
           document.getElementById("auth").style.display = "none";
           document.getElementById("chat_index").style.display = "block";
         })
@@ -137,7 +145,7 @@ function createChat() {
     document.getElementById("chat_index").style.display = "none";
     // auto put the user at the chat page
     console.log(data.magic_passphrase);
-    document.getElementById('invite_link').innerHTML = "chat/"+magic_passphrase;
+    document.getElementById('invite_link').innerHTML = "chat/"+data.magic_passphrase;
       // magic passphrase to the link area
     window.history.pushState('', 'Chat '+chat_id, '/chat/'+chat_id);
     getMessages();
@@ -188,6 +196,7 @@ function getMessages() {
 }
 
 function startMessagePolling() {
+  // check auth here too!
   // setInterval(getMessages(), 1000)
   setInterval(console.log('interval'), 5000);
   return;

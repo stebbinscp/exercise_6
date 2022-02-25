@@ -1,4 +1,5 @@
 from crypt import methods
+from sre_constants import MAGIC
 import string
 import random
 from datetime import datetime
@@ -39,7 +40,8 @@ def signup():
         USERS[username] = password
         # save the username and passcode combo
         authkey = ''.join(random.choices(string.ascii_lowercase + string.digits, k=15))
-        AUTHKEY_USER['authkey'] = username
+        AUTHKEY_USER[authkey] = username
+        print(USERS, AUTHKEY_USER)
         # save the authkey to the username 
         # return authkey for future requests
         return {"authkey": authkey}
@@ -56,13 +58,16 @@ def login():
         else:
             # if user and password match
             authkey = ''.join(random.choices(string.ascii_lowercase + string.digits, k=15))
-            AUTHKEY_USER['authkey'] = username
+            AUTHKEY_USER[authkey] = username
             # save authkey to username and return
+            print(USERS, AUTHKEY_USER)
             return {"authkey": authkey}
         
 @app.route('/chat_list')
 def get_chat_list():
     authkey = request.args['authkey']
+    print(USERS, AUTHKEY_USER)
+    print(CHATS)
     return_chats = []
     if len(CHATS) > 0:
         for chat in CHATS:
@@ -75,7 +80,7 @@ def get_chat_list():
 
 @app.route('/create_chat')
 def create_chat():
-    if authkey in request.args:
+    if "authkey" in request.args:
         # ensure we have a key and an authorized user
         authkey = request.args['authkey']
         username = AUTHKEY_USER[authkey]
@@ -91,6 +96,8 @@ def create_chat():
     # store magic passphrase
     CHATS[chat_id]['magic'] = magic_passphrase
     MAGIC_CHATS[magic_passphrase] = chat_id
+    print(USERS, AUTHKEY_USER)
+    print(CHATS, MAGIC_CHATS)
     return {"chat_id": chat_id, "magic_passphrase": magic_passphrase}
 
 @app.route('/chat/<chat_id>', methods=['GET'])
