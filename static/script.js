@@ -32,11 +32,7 @@
 // }
 
 function login() {
-  console.log("clicked");
-  console.log(document.getElementById("username").value);
-  console.log(document.getElementById('password').value);
   // get username and passcode
-
   fetch('/login?'+ new URLSearchParams({
       username: document.getElementById('username').value,
       password: document.getElementById('password').value
@@ -44,15 +40,12 @@ function login() {
     // send username and passcode to backend
     .then(response => response.json())
     .then(data => {
-      console.log(data);
       if (!Object.keys(data).includes('authkey')) {
-        console.log("failed");
         // if we do not get an authkey, we have failed
       } else {
         myStorage = window.localStorage;
         myStorage.setItem("authkey", data.authkey);
         // save authkey
-        console.log("successful");
         document.getElementById("auth").style.display = "none";
         // remove auth from view
         document.getElementById("chat_index").style.display = "block";
@@ -64,8 +57,6 @@ function login() {
         }))
         .then(response => response.json())
         .then(data => {
-          console.log(data);
-          console.log("successful");
           const chats = data.chats;
           const chat_index = document.getElementById("chat_index");
           // map each chat
@@ -81,22 +72,17 @@ function login() {
 }
 
 function signup() {
-  console.log(document.getElementById("username").value);
-  console.log(document.getElementById('password').value);
-
   fetch('/signup?'+ new URLSearchParams({
       username: document.getElementById('username').value,
       password: document.getElementById('password').value
     }))
     .then(response => response.json())
     .then(data => {
-      console.log(data);
       if (!Object.keys(data).includes("authkey")) {
         console.log("failed");
       } else {
         myStorage = window.localStorage;
         myStorage.setItem("authkey", data.authkey);
-        console.log("successful");
         document.getElementById("auth").style.display = "none";
         document.getElementById("chat_index").style.display = "block";
         
@@ -107,8 +93,6 @@ function signup() {
         }))
         .then(response => response.json())
         .then(data => {
-          console.log(data);
-          console.log("successful");
           if ("chats" in Object.keys(data)) {
             const chats = data.chats;
             const chat_index = document.getElementById("chat_index");
@@ -130,7 +114,6 @@ function signup() {
 }
 
 function createChat() {
-  console.log("clicked create chat");
   myStorage = window.localStorage;
   authkey = myStorage.getItem('authkey');
   fetch('/create_chat?'+ new URLSearchParams({
@@ -138,13 +121,10 @@ function createChat() {
   }))
   .then(response => response.json())
   .then(data => {
-    console.log(data);
-    console.log("successful");
     const chat_id = data.chat_id;
     document.getElementById("auth").style.display = "none";
     document.getElementById("chat_index").style.display = "none";
     // auto put the user at the chat page
-    console.log(data.magic_passphrase);
     document.getElementById('invite_link').innerHTML = "chat/"+data.magic_passphrase;
       // magic passphrase to the link area
     window.history.pushState('', 'Chat '+chat_id, '/chat/'+chat_id);
@@ -158,48 +138,50 @@ function createChat() {
 function postMessage() {
   myStorage = window.localStorage;
   authkey = myStorage.getItem('authkey');
-  const chat_id = window.location.href.split("/")[3];
-  fetch('/chat/'+chat_id+"?"+ new URLSearchParams({
-    authkey: authkey
+  const chat_id = window.location.href.split("/")[4];
+  fetch(chat_id+"?"+ new URLSearchParams({
+    authkey: authkey,
+    message: document.getElementById("comment").value
   }), {method: 'POST'})
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-    console.log("successful");
-  })
   return;
 }
 
 function getMessages() {
-  console.log("in get");
   myStorage = window.localStorage;
   if (Object.keys(myStorage).includes('authkey')) {
     authkey = myStorage.getItem('authkey');
-    console.log(authkey);
-    console.log(window.location.href)
-    const chat_id = window.location.href.split("/")[4];
-    console.log(chat_id);
+    const chat_id = window.location.href.split("/")[4].replace("?","").replace("#", "");
     fetch('/chat/'+chat_id+"/messages?"+ new URLSearchParams({
       authkey: authkey
     }))
     .then(response => response.json())
     .then(data => {
+      console.log(data);
       document.getElementById("auth").style.display = "none";
       document.getElementById("chat_index").style.display = "none";
       document.getElementById("chat_section").style.display = "block";
       document.getElementById("invite_link").innerHTML = "127.0.0.1:5000/chat/"+data.magic_passphrase;
       window.history.pushState('', 'Chat '+data.chat_id, '/chat/'+data.chat_id);
+      const messageHolder = document.getElementById("messages");
+        while (messageHolder.firstChild) {
+          messageHolder.removeChild(messageHolder.firstChild);
+        }
+        data.messages.map((message) => {
+          var item = document.createElement("message");
+          var commenter = document.createElement("author");
+          commenter.innerText = message.username;
+          var comment = document.createElement("content");
+          comment.innerText = message.message;
+          item.appendChild(commenter);
+          item.appendChild(comment);
+          messageHolder.appendChild(item);
+        })
     })
   } else {
-    console.log('interval');
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("chat_index").style.display = "none";
+    document.getElementById("chat_section").style.display = "none";
+    window.history.pushState('', '/');
   }
   return
-}
-
-function startMessagePolling() {
-  // check auth here too!
-  setInterval(getMessages(), 100);
-  // getMessages();
-  // setInterval(console.log('interval'), 5000);
-  return;
 }

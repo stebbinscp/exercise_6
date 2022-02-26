@@ -72,6 +72,8 @@ def get_chat_list():
     print("chats")
     print(CHATS)
     return_chats = []
+    if authkey == "undefined":
+        return {"message": "not a chats page"}
     if len(CHATS) > 0:
         for chat in CHATS:
             # if the username associated with the authkey is in the CHATS chat authorized
@@ -116,6 +118,8 @@ def get_chat_messages(chat_id):
         username = AUTHKEY_USER[authkey]
         print(username, authkey)
     else: return {'message': 'no authkey provided'}
+    if authkey == "undefined":
+        return {"message": "not a chats page"}
     if chat_id in CHATS.keys():
         CHATS[chat_id]['authorized'].append(username)
         return {
@@ -135,8 +139,6 @@ def get_chat_messages(chat_id):
             "chat_id": MAGIC_CHATS[chat_id],
             'magic_passphrase': chat_id
             }
-        # how do I get the user in here as authorized?
-        # get messages I think @TODO
 
 @app.route('/chat/<chat_id>', methods=['GET'])
 def get_chat(chat_id):
@@ -153,20 +155,24 @@ def get_chat(chat_id):
 @app.route('/chat/<chat_id>', methods=['POST'])
 def post_chat(chat_id):
     print("in post chat")
-    if authkey in request.args:
+    print(chat_id)
+    print(CHATS)
+    if "authkey" in request.args:
         authkey = request.args['authkey']
         username = AUTHKEY_USER[authkey]
         message = request.args['message']
     else:
         return {"message": "error"}
-    for chat in CHATS:
-        if username in CHATS[chat]["authorized"]:
-            CHATS[chat_id]["messages"].append(
-                {
-                    "username": username,
-                    "message": message
-                }
-            )
+
+    if username in CHATS[chat_id]["authorized"]:
+        print(username)
+        CHATS[chat_id]["messages"].append(
+            {
+                "username": username,
+                "message": message
+            }
+        )
+    return {"message": "successful"}
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=5000, debug=True)
