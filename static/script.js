@@ -173,22 +173,22 @@ function postMessage() {
 function getMessages() {
   console.log("in get");
   myStorage = window.localStorage;
-  console.log(myStorage);
-  if ('authkey' in Object.keys(myStorage)) {
+  if (Object.keys(myStorage).includes('authkey')) {
     authkey = myStorage.getItem('authkey');
     console.log(authkey);
-    const chat_id = window.location.href.split("/")[3];
-    fetch('/chat/'+chat_id+"?"+ new URLSearchParams({
+    console.log(window.location.href)
+    const chat_id = window.location.href.split("/")[4];
+    console.log(chat_id);
+    fetch('/chat/'+chat_id+"/messages?"+ new URLSearchParams({
       authkey: authkey
     }))
     .then(response => response.json())
     .then(data => {
-      console.log(data);
-      console.log("successful");
       document.getElementById("auth").style.display = "none";
       document.getElementById("chat_index").style.display = "none";
       document.getElementById("chat_section").style.display = "block";
-      window.history.pushState('', 'Chat '+chat_id, '/chat/'+chat_id);
+      document.getElementById("invite_link").innerHTML = "127.0.0.1:5000/chat/"+data.magic_passphrase;
+      window.history.pushState('', 'Chat '+data.chat_id, '/chat/'+data.chat_id);
     })
   } else {
     console.log('interval');
@@ -198,8 +198,8 @@ function getMessages() {
 
 function startMessagePolling() {
   // check auth here too!
-  // setInterval(getMessages(), 100);
-  getMessages();
+  setInterval(getMessages(), 100);
+  // getMessages();
   // setInterval(console.log('interval'), 5000);
   return;
 }

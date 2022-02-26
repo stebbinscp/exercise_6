@@ -1,4 +1,3 @@
-
 <html>
   <head>
     <title>Watch Party</title>
@@ -7,9 +6,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Rowdies:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/static/style.css"></link>
     <script src="/static/script.js"></script>
-    <script src="script.js"></script>
   </head>
-  <body>
+  <body onLoad="x=setInterval('getMessages()', 10000);">
 
     <div id="auth"> 
       <h2>Welcome to Watch Party!</h2>
@@ -25,6 +23,44 @@
     </div>
 
     <div id="chat_index" class="container">
+      <script>
+        console.log(window.localStorage);
+        authkey = window.localStorage.getItem('authkey')
+        fetch('/chat_list?'+ new URLSearchParams({
+          authkey: authkey
+          // send authkey to get the username's chats
+        }))
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          console.log("successful");
+          if (Object.keys(data).includes("chats")) {
+            const chats = data.chats;
+            const chat_index = document.getElementById("chat_index");
+            // map each chat
+            chats.map((chat) => {
+              var listItem = document.createElement("p");
+              var text = document.createTextNode("chat id: "+chat);
+              listItem.appendChild(text);
+              listItem.onclick = function() {
+                console.log("clicked!")
+                const chat_id = chat;
+                document.getElementById("auth").style.display = "none";
+                document.getElementById("chat_index").style.display = "none";
+                document.getElementById("chat_section").style.display = "block";
+                window.history.pushState('', 'Chat '+chat_id, '/chat/'+chat_id);
+                getMessages();
+              }
+              chat_index.appendChild(listItem);
+            })
+          } else {
+            const chat_index = document.getElementById("chat_index");
+            var text = document.createTextNode("oops! no chats for this user!");
+            chat_index.appendChild(text);
+          }
+          
+        })
+      </script>
       <hero>
         <logo>
           <img id="tv" src="static/tv.jpeg">
@@ -63,5 +99,27 @@
       </div>
     </div>
   </body>
-  <script src="script.js"></script>
+  <script>
+    if (window.location.href.includes("/chat/")) {
+      if (Object.keys(window.localStorage).includes("authkey")) {
+        document.getElementById("chat_index").style.display = "none";
+        document.getElementById("chat_section").style.display = "block";
+        document.getElementById("auth").style.display = "none";
+      } else {
+        document.getElementById("chat_index").style.display = "none";
+        document.getElementById("chat_section").style.display = "none";
+        document.getElementById("auth").style.display = "block";
+      }
+    } else if (window.location.href.split("/").length === 4) {
+      if (Object.keys(window.localStorage).includes("authkey")) {
+        document.getElementById("chat_index").style.display = "block";
+        document.getElementById("chat_section").style.display = "none";
+        document.getElementById("auth").style.display = "none";
+      } else {
+        document.getElementById("chat_index").style.display = "none";
+        document.getElementById("chat_section").style.display = "none";
+        document.getElementById("auth").style.display = "block";
+      }
+    }
+  </script>
 </html>
