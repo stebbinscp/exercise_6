@@ -45,12 +45,12 @@ function login() {
     .then(response => response.json())
     .then(data => {
       console.log(data);
-      if (!"authkey" in Object.keys(data)) {
+      if (!Object.keys(data).includes('authkey')) {
         console.log("failed");
         // if we do not get an authkey, we have failed
       } else {
         myStorage = window.localStorage;
-        myStorage.setItem("authkey", authkey);
+        myStorage.setItem("authkey", data.authkey);
         // save authkey
         console.log("successful");
         document.getElementById("auth").style.display = "none";
@@ -59,14 +59,14 @@ function login() {
         // displace the chat index
 
         fetch('/chat_list?'+ new URLSearchParams({
-          authkey: document.getElementById('authkey').value
+          authkey: window.localStorage.getItem('authkey')
           // send authkey to get the username's chats
         }))
         .then(response => response.json())
         .then(data => {
           console.log(data);
           console.log("successful");
-          const chats = datum.chats;
+          const chats = data.chats;
           const chat_index = document.getElementById("chat_index");
           // map each chat
           chats.map((chat) => {
@@ -91,7 +91,7 @@ function signup() {
     .then(response => response.json())
     .then(data => {
       console.log(data);
-      if (!"authkey" in Object.keys(data)) {
+      if (!Object.keys(data).includes("authkey")) {
         console.log("failed");
       } else {
         myStorage = window.localStorage;
