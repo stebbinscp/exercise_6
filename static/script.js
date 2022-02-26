@@ -148,15 +148,13 @@ function createChat() {
     document.getElementById('invite_link').innerHTML = "chat/"+data.magic_passphrase;
       // magic passphrase to the link area
     window.history.pushState('', 'Chat '+chat_id, '/chat/'+chat_id);
+    document.getElementById("chat_section").style.display = "block";
     getMessages();
   })
 }
 
 /* For chat.html */
 
-// TODO: Fetch the list of existing chat messages.
-// POST to the API when the user posts a new message.
-// Automatically poll for new messages on a regular interval.
 function postMessage() {
   myStorage = window.localStorage;
   authkey = myStorage.getItem('authkey');
@@ -173,9 +171,12 @@ function postMessage() {
 }
 
 function getMessages() {
+  console.log("in get");
   myStorage = window.localStorage;
+  console.log(myStorage);
   if ('authkey' in Object.keys(myStorage)) {
     authkey = myStorage.getItem('authkey');
+    console.log(authkey);
     const chat_id = window.location.href.split("/")[3];
     fetch('/chat/'+chat_id+"?"+ new URLSearchParams({
       authkey: authkey
@@ -192,12 +193,13 @@ function getMessages() {
   } else {
     console.log('interval');
   }
-  return;
+  return
 }
 
 function startMessagePolling() {
   // check auth here too!
-  // setInterval(getMessages(), 1000)
-  setInterval(console.log('interval'), 5000);
+  // setInterval(getMessages(), 100);
+  getMessages();
+  // setInterval(console.log('interval'), 5000);
   return;
 }

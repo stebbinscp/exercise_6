@@ -66,7 +66,9 @@ def login():
 @app.route('/chat_list')
 def get_chat_list():
     authkey = request.args['authkey']
+    print("authkey and users")
     print(USERS, AUTHKEY_USER)
+    print("chats")
     print(CHATS)
     return_chats = []
     if len(CHATS) > 0:
@@ -80,6 +82,10 @@ def get_chat_list():
 
 @app.route('/create_chat')
 def create_chat():
+    print("auth and users")
+    print(USERS)
+    print(AUTHKEY_USER)
+    print(AUTHKEY_USER)
     if "authkey" in request.args:
         # ensure we have a key and an authorized user
         authkey = request.args['authkey']
@@ -102,32 +108,38 @@ def create_chat():
 
 @app.route('/chat/<chat_id>', methods=['GET'])
 def get_chat(chat_id):
-    if authkey in request.args:
+    print("in get chat")
+    print(AUTHKEY_USER)
+    if "authkey" in request.args:
         authkey = request.args['authkey']
         username = AUTHKEY_USER[authkey]
-    if chat_id in CHATS.keys():
-        # real chat 
-        # get the magic passcode so we can return it to render
-        if username in CHATS[chat_id]['authorized']:
+        print("username")
+        print(AUTHKEY_USER)
+        print(username)
+        if chat_id in CHATS.keys():
+            # real chat 
+            # get the magic passcode so we can return it to render
+            if username in CHATS[chat_id]['authorized']:
+                return {
+                    "messages": CHATS[chat_id]['messages'],
+                    "chat_id": chat_id,
+                    'magic_passphrase':CHATS[chat_id]['magic_passphrase']
+                }
+        elif chat_id in MAGIC_CHATS.keys():
+            # magic passcode
+            # get the original chat with MAGIC_CHATS[chat_id] and authorize user
+            # pass the chat id back and the magic pass
+            CHATS[MAGIC_CHATS[chat_id]]["authorized"].append(username)
             return {
-                "messages": CHATS[chat_id]['messages'],
-                "chat_id": chat_id,
-                'magic_passphrase':CHATS[chat_id]['magic_passphrase']
-            }
-    elif chat_id in MAGIC_CHATS.keys():
-        # magic passcode
-        # get the original chat with MAGIC_CHATS[chat_id] and authorize user
-        # pass the chat id back and the magic pass
-        CHATS[MAGIC_CHATS[chat_id]]["authorized"].append(username)
-        return {
-            "messages": CHATS[MAGIC_CHATS[chat_id]],
-            "chat_id": MAGIC_CHATS[chat_id],
-            'magic_passphrase': chat_id
-            }
+                "messages": CHATS[MAGIC_CHATS[chat_id]],
+                "chat_id": MAGIC_CHATS[chat_id],
+                'magic_passphrase': chat_id
+                }
     else: return {'message': 'chat id did not match in real ids or in magic passphrases'}
 
 @app.route('/chat/<chat_id>', methods=['POST'])
 def post_chat(chat_id):
+    print("in post chat")
     if authkey in request.args:
         authkey = request.args['authkey']
         username = AUTHKEY_USER[authkey]
