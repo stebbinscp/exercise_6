@@ -115,11 +115,7 @@ def get_chat_messages(chat_id):
     if "authkey" in request.args:
         # ensure we have a key and an authorized user
         authkey = request.args['authkey']
-        print(authkey)
-        print(AUTHKEY_USER)
         username = AUTHKEY_USER[authkey]
-        print("username and authkey pair")
-        print(username, authkey)
     else: return {'message': 'no authkey provided'}
     if authkey == "undefined":
         return {"message": "not a chats page"}
@@ -131,9 +127,6 @@ def get_chat_messages(chat_id):
             'magic_passphrase': CHATS_MAGIC[chat_id]
             }
     elif chat_id in MAGIC_CHATS.keys():
-        print("MAGIC")
-        print(CHATS_MAGIC)
-        print(chat_id)
         chat_to_save = MAGIC_CHATS[chat_id]
         if username not in CHATS[chat_to_save]['authorized']:
             CHATS[chat_to_save]['authorized'].append(username)
